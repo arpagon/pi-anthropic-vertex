@@ -1,0 +1,26 @@
+{
+  "name": "pi-extension-anthropic-vertex-compat",
+  "version": "0.1.0",
+  "description": "pi extension that maps Claude-style Vertex env vars to pi anthropic-vertex runtime",
+  "type": "module",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "anthropic",
+    "vertex-ai"
+  ],
+  "license": "MIT",
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-ai": "*",
+    "@mariozechner/pi-coding-agent": "*"
+  },
+  "scripts": {
+    "build": "echo 'nothing to build'",
+    "check": "echo 'nothing to check'"
+  }
+}
