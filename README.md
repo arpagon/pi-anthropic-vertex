@@ -33,9 +33,22 @@ pi install git:github.com/basnijholt/pi-anthropic-vertex
 
 ## Usage
 
+### Option A: Service account credential file
+
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/claude-vertex-key.json"
-export ANTHROPIC_VERTEX_PROJECT_ID="gen-lang-client-XXXXXX"
+export ANTHROPIC_VERTEX_PROJECT_ID="your-gcp-project-id"
+export CLOUD_ML_REGION="us-east5"
+
+pi --provider anthropic-vertex --model claude-opus-4-6@default
+```
+
+### Option B: gcloud Application Default Credentials (no credential file)
+
+```bash
+gcloud auth application-default login
+
+export ANTHROPIC_VERTEX_PROJECT_ID="your-gcp-project-id"
 export CLOUD_ML_REGION="us-east5"
 
 pi --provider anthropic-vertex --model claude-opus-4-6@default
