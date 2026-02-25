@@ -1,7 +1,7 @@
 {
   "name": "pi-anthropic-vertex",
-  "version": "0.1.0",
-  "description": "pi extension that maps Claude-style Vertex env vars to pi anthropic-vertex runtime",
+  "version": "0.2.0",
+  "description": "Standalone Anthropic Vertex provider extension for pi",
   "type": "module",
   "keywords": [
     "pi-package",
@@ -18,6 +18,10 @@
   "peerDependencies": {
     "@mariozechner/pi-ai": "*",
     "@mariozechner/pi-coding-agent": "*"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.73.0",
+    "@anthropic-ai/vertex-sdk": "^0.14.0"
   },
   "scripts": {
     "build": "echo 'nothing to build'",

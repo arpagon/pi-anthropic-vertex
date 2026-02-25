@@ -1,39 +1,48 @@
 # pi-anthropic-vertex
 
-Compatibility extension for pi's built-in `anthropic-vertex` provider.
+Standalone Anthropic Vertex provider extension for pi.
 
-It lets you keep Claude Code style env vars and still use `pi --provider anthropic-vertex`.
+This package adds `anthropic-vertex` support even when your pi build does not include it in core.
 
-## What it does
+## What it provides
 
-Adds fallback mapping at runtime:
+- Registers provider: `anthropic-vertex`
+- Registers Claude Vertex model list
+- Implements Anthropic Vertex streaming via `@anthropic-ai/vertex-sdk`
+- Supports both Google-standard and Claude-style project/region env vars
 
-- `ANTHROPIC_VERTEX_PROJECT_ID` -> Vertex project
-- `CLOUD_ML_REGION` -> Vertex region (fallback)
+Project ID resolution order:
 
-It still respects native pi vars first:
+1. stream options `project`
+2. `GOOGLE_CLOUD_PROJECT`
+3. `GCLOUD_PROJECT`
+4. `ANTHROPIC_VERTEX_PROJECT_ID`
+5. `gcloud config get-value project`
 
-- `GOOGLE_CLOUD_PROJECT` / `GCLOUD_PROJECT`
-- `GOOGLE_CLOUD_LOCATION`
-- `GOOGLE_APPLICATION_CREDENTIALS`
+Region resolution order:
+
+1. stream options `region`
+2. `GOOGLE_CLOUD_LOCATION`
+3. `CLOUD_ML_REGION`
+4. default `us-east5`
 
 ## Install
 
-### Local path
-
-```bash
-pi install ~/repos/pi-anthropic-vertex
-```
-
-### Git (after you push)
+### From git
 
 ```bash
 pi install git:github.com/basnijholt/pi-anthropic-vertex
 ```
 
+### From local path
+
+```bash
+pi install ~/repos/pi-anthropic-vertex
+```
+
 ## Usage
 
-### Option A: Service account credential file
+### Option A: service account credential file
 
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/claude-vertex-key.json"
@@ -43,18 +52,18 @@ export CLOUD_ML_REGION="us-east5"
 pi --provider anthropic-vertex --model claude-opus-4-6@default
 ```
 
-### Option B: gcloud Application Default Credentials (no credential file)
+### Option B: gcloud ADC (no credential file)
 
 ```bash
 gcloud auth application-default login
+gcloud config set project your-gcp-project-id
 
-export ANTHROPIC_VERTEX_PROJECT_ID="your-gcp-project-id"
 export CLOUD_ML_REGION="us-east5"
 
 pi --provider anthropic-vertex --model claude-opus-4-6@default
 ```
 
-Or for one-off testing without install:
+## One-off test (without install)
 
 ```bash
 pi -e ~/repos/pi-anthropic-vertex \
