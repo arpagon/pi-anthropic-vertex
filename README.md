@@ -1,4 +1,4 @@
-# pi-anthropic-vertex-compat
+# pi-anthropic-vertex
 
 Compatibility extension for pi's built-in `anthropic-vertex` provider.
 

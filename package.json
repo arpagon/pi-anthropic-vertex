@@ -1,5 +1,5 @@
 {
-  "name": "pi-extension-anthropic-vertex-compat",
+  "name": "pi-anthropic-vertex",
   "version": "0.1.0",
   "description": "pi extension that maps Claude-style Vertex env vars to pi anthropic-vertex runtime",
   "type": "module",
