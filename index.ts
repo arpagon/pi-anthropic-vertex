@@ -21,6 +21,8 @@ import {
 	type StreamOptions,
 	type TextContent,
 	type ThinkingContent,
+	type ThinkingBudgets,
+	type ThinkingLevel,
 	type Tool,
 	type ToolCall,
 	type ToolResultMessage,

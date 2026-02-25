@@ -1,6 +1,6 @@
 {
   "name": "pi-anthropic-vertex",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Standalone Anthropic Vertex provider extension for pi",
   "type": "module",
   "keywords": [
@@ -23,8 +23,15 @@
     "@anthropic-ai/sdk": "^0.73.0",
     "@anthropic-ai/vertex-sdk": "^0.14.0"
   },
+  "devDependencies": {
+    "@mariozechner/pi-ai": "^0.54.2",
+    "@mariozechner/pi-coding-agent": "^0.54.2",
+    "@types/node": "^22.10.5",
+    "typescript": "^5.9.3"
+  },
   "scripts": {
     "build": "echo 'nothing to build'",
-    "check": "echo 'nothing to check'"
+    "check": "tsc --noEmit",
+    "check:strict": "tsc --noEmit --pretty false"
   }
 }
