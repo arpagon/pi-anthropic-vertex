@@ -259,15 +259,109 @@ function convertContentBlocks(content: Array<TextContent | ImageContent>) {
 	return blocks;
 }
 
+/**
+ * Pre-process messages to handle aborted/errored assistant turns.
+ * Mirrors pi-mono's transformMessages logic:
+ * 1. Skip assistant messages with stopReason "error" or "aborted"
+ * 2. Insert synthetic tool_result for orphaned tool_use blocks
+ */
+function sanitizeMessages(messages: Message[]): Message[] {
+	const result: Message[] = [];
+	let pendingToolCalls: ToolCall[] = [];
+	let existingToolResultIds = new Set<string>();
+
+	for (let i = 0; i < messages.length; i++) {
+		const msg = messages[i];
+
+		if (msg.role === "assistant") {
+			// If we have pending orphaned tool calls from a previous assistant, insert synthetic results
+			if (pendingToolCalls.length > 0) {
+				for (const tc of pendingToolCalls) {
+					if (!existingToolResultIds.has(tc.id)) {
+						result.push({
+							role: "toolResult",
+							toolCallId: tc.id,
+							toolName: tc.name,
+							content: [{ type: "text", text: "No result provided" }],
+							isError: true,
+							timestamp: Date.now(),
+						} as ToolResultMessage);
+					}
+				}
+				pendingToolCalls = [];
+				existingToolResultIds = new Set();
+			}
+
+			// Skip errored/aborted assistant messages entirely — they are incomplete turns
+			const assistantMsg = msg as AssistantMessage;
+			if (assistantMsg.stopReason === "error" || assistantMsg.stopReason === "aborted") {
+				continue;
+			}
+
+			// Track tool calls from this assistant message
+			const toolCalls = assistantMsg.content.filter((b): b is ToolCall => b.type === "toolCall");
+			if (toolCalls.length > 0) {
+				pendingToolCalls = toolCalls;
+				existingToolResultIds = new Set();
+			}
+
+			result.push(msg);
+		} else if (msg.role === "toolResult") {
+			existingToolResultIds.add(msg.toolCallId);
+			result.push(msg);
+		} else if (msg.role === "user") {
+			// User message interrupts tool flow — insert synthetic results for orphaned calls
+			if (pendingToolCalls.length > 0) {
+				for (const tc of pendingToolCalls) {
+					if (!existingToolResultIds.has(tc.id)) {
+						result.push({
+							role: "toolResult",
+							toolCallId: tc.id,
+							toolName: tc.name,
+							content: [{ type: "text", text: "No result provided" }],
+							isError: true,
+							timestamp: Date.now(),
+						} as ToolResultMessage);
+					}
+				}
+				pendingToolCalls = [];
+				existingToolResultIds = new Set();
+			}
+			result.push(msg);
+		} else {
+			result.push(msg);
+		}
+	}
+
+	// Handle trailing orphaned tool calls at end of message list
+	if (pendingToolCalls.length > 0) {
+		for (const tc of pendingToolCalls) {
+			if (!existingToolResultIds.has(tc.id)) {
+				result.push({
+					role: "toolResult",
+					toolCallId: tc.id,
+					toolName: tc.name,
+					content: [{ type: "text", text: "No result provided" }],
+					isError: true,
+					timestamp: Date.now(),
+				} as ToolResultMessage);
+			}
+		}
+	}
+
+	return result;
+}
+
 function convertMessages(
 	messages: Message[],
 	model: Model<Api>,
 	cacheControl?: { type: "ephemeral"; ttl?: "1h" },
 ): MessageParam[] {
 	const params: MessageParam[] = [];
+	const sanitized = sanitizeMessages(messages);
 
-	for (let i = 0; i < messages.length; i++) {
-		const msg = messages[i];
+	for (let i = 0; i < sanitized.length; i++) {
+		const msg = sanitized[i];
 
 		if (msg.role === "user") {
 			if (typeof msg.content === "string") {
@@ -346,8 +440,8 @@ function convertMessages(
 			});
 
 			let j = i + 1;
-			while (j < messages.length && messages[j].role === "toolResult") {
-				const next = messages[j] as ToolResultMessage;
+			while (j < sanitized.length && sanitized[j].role === "toolResult") {
+				const next = sanitized[j] as ToolResultMessage;
 				toolResults.push({
 					type: "tool_result",
 					tool_use_id: next.toolCallId,
