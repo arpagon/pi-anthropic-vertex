@@ -136,7 +136,7 @@ const MODELS: ProviderModelConfig[] = [
 	},
 ];
 
-type AnthropicVertexEffort = "low" | "medium" | "high" | "xhigh" | "max";
+type AnthropicVertexEffort = "low" | "medium" | "high" | "max";
 
 interface AnthropicVertexOptions extends StreamOptions {
 	thinkingEnabled?: boolean;
@@ -191,7 +191,7 @@ function mapThinkingLevelToEffort(level: SimpleStreamOptions["reasoning"]): Anth
 		case "high":
 			return "high";
 		case "xhigh":
-			return "xhigh";
+			return "max";
 		default:
 			return "high";
 	}
