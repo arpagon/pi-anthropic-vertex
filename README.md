@@ -49,7 +49,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/claude-vertex-key.json"
 export ANTHROPIC_VERTEX_PROJECT_ID="your-gcp-project-id"
 export CLOUD_ML_REGION="us-east5"
 
-pi --provider anthropic-vertex --model claude-opus-4-6@default
+pi --provider anthropic-vertex --model claude-opus-4-7@default
 ```
 
 ### Option B: gcloud ADC (no credential file)
@@ -60,7 +60,7 @@ gcloud config set project your-gcp-project-id
 
 export CLOUD_ML_REGION="us-east5"
 
-pi --provider anthropic-vertex --model claude-opus-4-6@default
+pi --provider anthropic-vertex --model claude-opus-4-7@default
 ```
 
 ## One-off test (without install)
@@ -68,5 +68,5 @@ pi --provider anthropic-vertex --model claude-opus-4-6@default
 ```bash
 pi -e ~/repos/pi-anthropic-vertex \
   --provider anthropic-vertex \
-  --model claude-opus-4-6@default
+  --model claude-opus-4-7@default
 ```

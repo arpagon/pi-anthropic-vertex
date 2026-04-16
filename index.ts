@@ -53,6 +53,15 @@ const MODELS: ProviderModelConfig[] = [
 		maxTokens: 32000,
 	},
 	{
+		id: "claude-opus-4-7@default",
+		name: "Claude Opus 4.7 (Vertex AI)",
+		reasoning: true,
+		input: ["text", "image"],
+		cost: { input: 5, output: 25, cacheRead: 0.5, cacheWrite: 6.25 },
+		contextWindow: 1000000,
+		maxTokens: 128000,
+	},
+	{
 		id: "claude-opus-4-6@default",
 		name: "Claude Opus 4.6 (Vertex AI)",
 		reasoning: true,
@@ -126,7 +135,7 @@ const MODELS: ProviderModelConfig[] = [
 	},
 ];
 
-type AnthropicVertexEffort = "low" | "medium" | "high" | "max";
+type AnthropicVertexEffort = "low" | "medium" | "high" | "xhigh" | "max";
 
 interface AnthropicVertexOptions extends StreamOptions {
 	thinkingEnabled?: boolean;
@@ -167,7 +176,8 @@ function mergeHeaders(...sources: Array<Record<string, string> | undefined>): Re
 }
 
 function supportsAdaptiveThinking(modelId: string): boolean {
-	return modelId.includes("opus-4-6") || modelId.includes("opus-4.6");
+	return modelId.includes("opus-4-7") || modelId.includes("opus-4.7")
+		|| modelId.includes("opus-4-6") || modelId.includes("opus-4.6");
 }
 
 function mapThinkingLevelToEffort(level: SimpleStreamOptions["reasoning"]): AnthropicVertexEffort {
@@ -180,7 +190,7 @@ function mapThinkingLevelToEffort(level: SimpleStreamOptions["reasoning"]): Anth
 		case "high":
 			return "high";
 		case "xhigh":
-			return "max";
+			return "xhigh";
 		default:
 			return "high";
 	}
@@ -601,7 +611,7 @@ function buildParams(
 		if (supportsAdaptiveThinking(model.id)) {
 			params.thinking = { type: "adaptive" };
 			if (options.effort) {
-				params.output_config = { effort: options.effort };
+				params.output_config = { effort: options.effort as "low" | "medium" | "high" | "max" };
 			}
 		} else {
 			params.thinking = {
