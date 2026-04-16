@@ -31,6 +31,7 @@ import {
 import type { ExtensionAPI, ProviderModelConfig } from "@mariozechner/pi-coding-agent";
 
 const DEFAULT_REGION = "us-east5";
+const DEFAULT_REGION_47 = "global";
 const BASE_URL = "https://{region}-aiplatform.googleapis.com";
 
 const MODELS: ProviderModelConfig[] = [
@@ -543,10 +544,15 @@ function resolveProject(options?: AnthropicVertexOptions): string | undefined {
 	);
 }
 
-function resolveRegion(options?: AnthropicVertexOptions): string {
-	return (
-		options?.region ?? process.env.GOOGLE_CLOUD_LOCATION ?? process.env.CLOUD_ML_REGION ?? DEFAULT_REGION
-	);
+function isModel47(modelId: string): boolean {
+	return /[-.]4[-.]?7/.test(modelId);
+}
+
+function resolveRegion(modelId: string, options?: AnthropicVertexOptions): string {
+	if (isModel47(modelId)) {
+		return options?.region ?? DEFAULT_REGION_47;
+	}
+	return options?.region ?? process.env.GOOGLE_CLOUD_LOCATION ?? process.env.CLOUD_ML_REGION ?? DEFAULT_REGION;
 }
 
 function createClient(model: Model<Api>, options?: AnthropicVertexOptions): AnthropicVertex {
@@ -564,7 +570,7 @@ function createClient(model: Model<Api>, options?: AnthropicVertexOptions): Anth
 
 	return new AnthropicVertex({
 		projectId: project,
-		region: resolveRegion(options),
+		region: resolveRegion(model.id, options),
 		defaultHeaders: mergeHeaders(
 			{
 				accept: "application/json",
